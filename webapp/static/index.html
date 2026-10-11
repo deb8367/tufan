@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirWatch — National Air Quality Intelligence Portal</title>
+  
+  <!-- Institutional Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <!-- FontAwesome Vector Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="gov-theme">
+
+<!-- ========================================================
+     TOP HEADER (Full width layout as circled in screenshot)
+     ======================================================== -->
+<header class="app-topbar">
+  <div class="topbar-left">
+    <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    
+    <div class="brand-box">
+      <svg class="cpcb-wheel" viewBox="0 0 100 100" width="30" height="30">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#e2e8f0" stroke-width="1"/>
+        <path d="M50 50 L50 4 A46 46 0 0 1 89.8 27 Z" fill="#00b050"/>
+        <path d="M50 50 L89.8 27 A46 46 0 0 1 89.8 73 Z" fill="#92d050"/>
+        <path d="M50 50 L89.8 73 A46 46 0 0 1 50 96 Z" fill="#ffff00"/>
+        <path d="M50 50 L50 96 A46 46 0 0 1 10.2 73 Z" fill="#ff9900"/>
+        <path d="M50 50 L10.2 73 A46 46 0 0 1 10.2 27 Z" fill="#ff0000"/>
+        <path d="M50 50 L10.2 27 A46 46 0 0 1 50 4 Z" fill="#c00000"/>
+        <circle cx="50" cy="50" r="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+      </svg>
+      <div class="brand-titles">
+        <span class="brand-logo-name">AirWatch</span>
+        <span class="brand-subtitle">CPCB Intelligence &bull; TUFAN</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <!-- Location Pill -->
+    <div class="topbar-pill location-pill">
+      <i class="fa-solid fa-location-dot"></i>
+      <span>Delhi NCR, India</span>
+    </div>
+
+    <!-- Live Date & Clock -->
+    <div class="topbar-datetime">
+      <span class="topbar-date" id="liveDateDisplay">Saturday, 10 October 2026</span>
+      <span class="topbar-time" id="liveClockDisplay">04:00:00 PM</span>
+    </div>
+
+    <!-- Live System Pill with pulsing green dot -->
+    <div class="topbar-pill live-pill">
+      <span class="live-pulse-dot"></span>
+      <span>Live System</span>
+    </div>
+  </div>
+</header>
+
+<!-- ========================================================
+     MAIN APPLICATION LAYOUT (Sidebar + Viewport)
+     ======================================================== -->
+<div class="app-layout">
+
+  <!-- LEFT SIDEBAR (As circled in screenshot) -->
+  <aside class="sidebar">
+    <nav class="sidebar-menu">
+      <div class="sidebar-category">DASHBOARDS</div>
+      <button class="sidebar-link" data-target="section-indoor">
+        <i class="fa-solid fa-house-chimney-medical"></i>
+        <span>Indoor Dashboard</span>
+      </button>
+      <button class="sidebar-link" data-target="section-citizen">
+        <i class="fa-solid fa-users"></i>
+        <span>Citizen Dashboard</span>
+      </button>
+      <button class="sidebar-link" data-target="section-grap">
+        <i class="fa-solid fa-building-columns"></i>
+        <span>Govt Dashboard</span>
+      </button>
+      <button class="sidebar-link" data-target="section-admin">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Admin Panel</span>
+      </button>
+      <button class="sidebar-link active" data-target="section-map">
+        <i class="fa-solid fa-map"></i>
+        <span>Maps</span>
+      </button>
+
+      <div class="sidebar-category">MAP LAYERS</div>
+      <button class="sidebar-link" data-target="section-map" data-map-mode="delhi">
+        <i class="fa-solid fa-road"></i>
+        <span>Road Conditions</span>
+      </button>
+      <button class="sidebar-link" data-target="section-map" data-map-mode="india">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>AQI Heat Map</span>
+      </button>
+      <button class="sidebar-link" data-target="section-source">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>Source Attribution</span>
+      </button>
+      <button class="sidebar-link" data-target="section-stubble">
+        <i class="fa-solid fa-satellite"></i>
+        <span>Stubble Fire Influx</span>
+      </button>
+      <button class="sidebar-link" data-target="section-table">
+        <i class="fa-solid fa-table-list"></i>
+        <span>Bulletin Dataset (257)</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Telemetry Footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-status-box">
+        <div class="status-indicator-row">
+          <span class="status-dot-active"></span>
+          <strong>GRAP Stage II Active</strong>
+        </div>
+        <p class="status-sub">Delhi NCR &bull; Severe Watch</p>
+      </div>
+      <div class="sidebar-notes">
+        CPCB Official Bulletin<br>Oct 10, 2026 @ 4:00 PM
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN VIEWPORT -->
+  <main class="main-viewport">
+    <div class="content-scroll-container">
+
+      <!-- ====================================================
+           SECTION 1: GEOGRAPHIC AQI MAP (Default Active)
+           ==================================================== -->
+      <section class="dashboard-section active" id="section-map">
+        
+        <!-- Header Banner (matching user screenshot top strip) -->
+        <div class="map-subhead-banner">
+          <div class="map-subhead-left">
+            <h2 class="subhead-title">
+              <i class="fa-solid fa-road"></i>
+              Road Conditions &amp; AQI Heatmap
+              <span class="badge-status-tag">OFFICIAL CPCB DATA</span>
+            </h2>
+            <p class="subhead-subtitle">Delhi NCT Continuous Monitoring Grid (46 Stations) &bull; Greater NCR Corridor | Oct 10, 2026 @ 4:00 PM</p>
+          </div>
+        </div>
+
+        <!-- Dual Legend Bar (matching user screenshot legend strip) -->
+        <div class="map-legend-bar">
+          <div class="leg-subgroup">
+            <span class="leg-pill-btn"><i class="fa-solid fa-circle-dot"></i> Road Condition Map</span>
+            <span class="leg-sep">|</span>
+            <span class="leg-item"><span class="leg-line line-green"></span> Good</span>
+            <span class="leg-item"><span class="leg-line line-yellow"></span> Moderate</span>
+            <span class="leg-item"><span class="leg-line line-orange"></span> Bad / Traffic Hotspots</span>
+          </div>
+          <div class="leg-subgroup">
+            <span class="leg-pill-btn"><i class="fa-solid fa-square"></i> AQI Heatmap</span>
+            <span class="leg-sep">|</span>
+            <span class="leg-item"><span class="leg-box box-good"></span> Good</span>
+            <span class="leg-item"><span class="leg-box box-sat"></span> Satisfactory</span>
+            <span class="leg-item"><span class="leg-box box-mod"></span> Moderate</span>
+            <span class="leg-item"><span class="leg-box box-poor"></span> Poor</span>
+            <span class="leg-item"><span class="leg-box box-vpoor"></span> Very Poor</span>
+            <span class="leg-item"><span class="leg-box box-severe"></span> Severe</span>
+          </div>
+        </div>
+
+        <!-- Summary Cards Grid -->
+        <div class="summary-cards-grid">
+          <div class="stat-card border-delhi">
+            <div class="card-caption">National Capital Territory of Delhi</div>
+            <div class="card-main">
+              <div class="stat-num" id="delhiAqiVal">122</div>
+              <div class="stat-badge badge-moderate">Moderate</div>
+            </div>
+            <div class="stat-details">
+              <span><strong>City:</strong> Delhi (S.No 76)</span>
+              <span><strong>Prominent Pollutant:</strong> PM10</span>
+              <span><strong>Stations:</strong> 46 Participated / 50 Total</span>
+            </div>
+          </div>
+
+          <div class="stat-card border-overview">
+            <div class="card-caption">National 24-Hour Bulletin Summary</div>
+            <div class="card-main">
+              <div class="stat-num" id="totalCitiesCount">257</div>
+              <div class="stat-badge badge-all">Cities Monitored</div>
+            </div>
+            <div class="stat-details">
+              <span><strong>Cleanest City:</strong> Naharlagun (AQI 14 &bull; Good)</span>
+              <span><strong>Highest Index City:</strong> Dausa (AQI 195 &bull; Moderate)</span>
+              <span><strong>Primary Pollutant:</strong> PM10 (82% Cities)</span>
+            </div>
+          </div>
+
+          <div class="stat-card border-dist">
+            <div class="card-caption">Category Breakdown (257 Cities)</div>
+            <div class="distribution-bars">
+              <div class="dist-row">
+                <span class="dist-label"><span class="dot dot-good"></span> Good (0-50)</span>
+                <span class="dist-count" id="countGood">28 cities (11%)</span>
+              </div>
+              <div class="dist-row">
+                <span class="dist-label"><span class="dot dot-satisfactory"></span> Satisfactory (51-100)</span>
+                <span class="dist-count" id="countSatisfactory">132 cities (51%)</span>
+              </div>
+              <div class="dist-row">
+                <span class="dist-label"><span class="dot dot-moderate"></span> Moderate (101-200)</span>
+                <span class="dist-count" id="countModerate">97 cities (38%)</span>
+              </div>
+              <div class="dist-row">
+                <span class="dist-label"><span class="dot dot-poor"></span> Poor / Above (&gt;200)</span>
+                <span class="dist-count">0 cities</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map Card -->
+        <div class="section-card">
+          <div class="section-toolbar">
+            <div class="toolbar-left">
+              <h3 class="section-title">
+                <i class="fa-solid fa-map-location-dot"></i>
+                Geographic AQI Distribution &amp; Station Network
+              </h3>
+              <p class="section-desc">Mapped from CPCB Bulletin dataset (Oct 10, 2026 @ 4 PM) &bull; Click any station or city pin for full diagnostics</p>
+            </div>
+
+            <div class="toolbar-controls">
+              <div class="btn-group">
+                <button class="tool-btn active" id="btnViewDelhi">
+                  <i class="fa-solid fa-location-crosshairs"></i> Delhi &amp; NCR View
+                </button>
+                <button class="tool-btn" id="btnViewIndia">
+                  <i class="fa-solid fa-earth-asia"></i> All India (257 Cities)
+                </button>
+              </div>
+
+              <select class="filter-select" id="categoryFilter">
+                <option value="all">All Categories (257 Cities)</option>
+                <option value="Good">Good (AQI 0-50)</option>
+                <option value="Satisfactory">Satisfactory (AQI 51-100)</option>
+                <option value="Moderate">Moderate (AQI 101-200)</option>
+                <option value="delhi_ncr">Delhi &amp; NCR Region Only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="map-container-box">
+            <div id="cpcb-leaflet-map"></div>
+
+            <div class="cpcb-map-legend">
+              <div class="legend-title">CPCB AQI Category Scale</div>
+              <div class="legend-scale-row">
+                <span class="scale-item"><span class="scale-box" style="background:#00b050"></span> Good (0-50)</span>
+                <span class="scale-item"><span class="scale-box" style="background:#92d050"></span> Satisfactory (51-100)</span>
+                <span class="scale-item"><span class="scale-box" style="background:#ffff00"></span> Moderate (101-200)</span>
+                <span class="scale-item"><span class="scale-box" style="background:#ff9900"></span> Poor (201-300)</span>
+                <span class="scale-item"><span class="scale-box" style="background:#ff0000"></span> Very Poor (301-400)</span>
+                <span class="scale-item"><span class="scale-box" style="background:#c00000"></span> Severe (401-500)</span>
+              </div>
+              <div class="legend-footnote">
+                Source: Central Pollution Control Board (CPCB) Daily 4 PM Bulletin &bull; Oct 10, 2026
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ====================================================
+           SECTION 2: INDOOR AQI DASHBOARD
+           ==================================================== -->
+      <section class="dashboard-section" id="section-indoor" aria-labelledby="indoor-dashboard-title">
+        <div class="indoor-subhead-banner">
+          <div>
+            <div class="indoor-eyebrow"><i class="fa-solid fa-house-chimney-medical"></i> INDOOR ENVIRONMENT MONITOR</div>
+            <h2 id="indoor-dashboard-title">Indoor Air Quality</h2>
+            <p>Dr. B R Ambedkar Auditorium, Delhi Technological University &bull; TUFAN indoor monitoring station</p>
+          </div>
+          <div class="indoor-connection-status offline">
+            <span class="sensor-status-dot"></span>
+            Sensor offline
+          </div>
+        </div>
+
+        <div class="indoor-overview-grid">
+          <article class="indoor-aqi-card">
+            <div class="indoor-card-label">Current Indoor AQI</div>
+            <div class="indoor-aqi-readout">
+              <strong>78</strong>
+              <span>AQI</span>
+            </div>
+            <div class="indoor-category-badge"><i class="fa-solid fa-circle-check"></i> Satisfactory</div>
+            <p class="indoor-aqi-copy">Air quality is acceptable for most people. Sensitive individuals may notice minor discomfort with prolonged exposure.</p>
+          </article>
+
+          <article class="section-card indoor-summary-card">
+            <div class="indoor-card-heading">
+              <span class="indoor-icon-wrap blue"><i class="fa-solid fa-clock"></i></span>
+              <div>
+                <div class="indoor-card-label">Last seen</div>
+                <strong>10 October 2026</strong>
+              </div>
+            </div>
+            <div class="indoor-card-divider"></div>
+            <p>Latest successful reading received from the indoor monitoring station.</p>
+          </article>
+
+          <article class="section-card indoor-summary-card">
+            <div class="indoor-card-heading">
+              <span class="indoor-icon-wrap green"><i class="fa-solid fa-wind"></i></span>
+              <div>
+                <div class="indoor-card-label">Primary pollutant</div>
+                <strong>PM2.5</strong>
+              </div>
+            </div>
+            <div class="indoor-card-divider"></div>
+            <p>Fine particulate matter is the dominant indoor air-quality indicator.</p>
+          </article>
+        </div>
+
+        <div class="indoor-detail-grid">
+          <article class="section-card indoor-metrics-card">
+            <div class="section-toolbar">
+              <div>
+                <h3 class="section-title"><i class="fa-solid fa-gauge-high"></i> Indoor air-quality snapshot</h3>
+                <p class="section-desc">A concise view of the current TUFAN indoor environment</p>
+              </div>
+              <span class="indoor-reading-label">LIVE READING</span>
+            </div>
+            <div class="indoor-metrics-list">
+              <div class="indoor-metric-row">
+                <div><span class="metric-dot satisfactory"></span><span>Air Quality Index</span></div>
+                <strong>78 <small>AQI</small></strong>
+              </div>
+              <div class="indoor-metric-row">
+                <div><span class="metric-dot blue-dot"></span><span>Monitoring status</span></div>
+                <strong class="metric-offline">Sensor offline</strong>
+              </div>
+              <div class="indoor-metric-row">
+                <div><span class="metric-dot slate-dot"></span><span>Location</span></div>
+                <strong>Dr. B R Ambedkar Auditorium, Delhi Technological University</strong>
+              </div>
+              <div class="indoor-metric-row">
+                <div><span class="metric-dot slate-dot"></span><span>Latest data</span></div>
+                <strong>10 October 2026</strong>
+              </div>
+            </div>
+          </article>
+
+          <aside class="section-card indoor-advisory-card">
+            <div class="indoor-advisory-icon"><i class="fa-solid fa-shield-heart"></i></div>
+            <div>
+              <div class="indoor-card-label">TUFAN ADVISORY</div>
+              <h3>Comfortable indoor conditions</h3>
+              <p>Maintain normal ventilation and keep doors and windows closed during nearby traffic or dust events.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           SECTION 3: CITIZEN DASHBOARD
+           ==================================================== -->
+      <section class="dashboard-section" id="section-citizen">
+        <div class="grid-split">
+          <div class="section-card" style="padding: 24px;">
+            <h3 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 8px;">
+              <i class="fa-solid fa-users" style="color: #2563eb;"></i> Citizen Air Quality Advisory &amp; Health Protection
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+              Personalized guidance based on current Delhi NCR 24-hour average AQI (122 &bull; Moderate).
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+              <div style="background: #f8fafc; border: 1px solid var(--gov-border); border-radius: 6px; padding: 16px;">
+                <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 6px;">General Public</div>
+                <strong style="color: #00b050; display: block; margin-bottom: 4px;">Low Immediate Risk</strong>
+                <p style="font-size: 0.8rem; color: var(--text-body);">Normal outdoor exercise and daily activities can proceed. Avoid idling vehicle engines.</p>
+              </div>
+
+              <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 6px; padding: 16px;">
+                <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #854d0e; margin-bottom: 6px;">Sensitive Individuals</div>
+                <strong style="color: #d97706; display: block; margin-bottom: 4px;">Minor Breathing Discomfort</strong>
+                <p style="font-size: 0.8rem; color: var(--text-body);">People with asthma, elderly citizens, and children should limit prolonged strenuous outdoor exposure during peak morning hours.</p>
+              </div>
+
+              <div style="background: #f8fafc; border: 1px solid var(--gov-border); border-radius: 6px; padding: 16px;">
+                <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 6px;">Commuters &amp; Cyclists</div>
+                <strong style="color: #2563eb; display: block; margin-bottom: 4px;">Arterial Corridors Watch</strong>
+                <p style="font-size: 0.8rem; color: var(--text-body);">Keep vehicle windows rolled up in high traffic choke-points (Ring Road, ITO, Anand Vihar). Wear N95 masks if riding two-wheelers.</p>
+              </div>
+            </div>
+
+            <div style="background: #f1f5f9; border-radius: 6px; padding: 16px;">
+              <h4 style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">Recommended Citizen Actions under GRAP Stage II</h4>
+              <ul style="font-size: 0.82rem; color: var(--text-body); padding-left: 20px; line-height: 1.6;">
+                <li>Utilize public transit (Delhi Metro and electric DTC buses) to minimize vehicular exhaust.</li>
+                <li>Do not burn municipal solid waste, dry leaves, or biomass in the open.</li>
+                <li>Report construction dust or uncovered debris hauling via the CPCB Sameer App.</li>
+                <li>Ensure air purifiers are serviced and indoor windows are sealed during thermal inversion hours (6 PM - 9 AM).</li>
+              </ul>
+            </div>
+          </div>
+
+          <aside class="side-panel">
+            <div class="section-card side-card">
+              <div class="card-head">
+                <h4><i class="fa-solid fa-trophy"></i> National City Index Highlights</h4>
+              </div>
+              <div style="padding: 16px; display: flex; flex-direction: column; gap: 14px;">
+                <div style="border-bottom: 1px solid var(--gov-border); padding-bottom: 10px;">
+                  <span style="font-size: 0.72rem; color: #00b050; font-weight: 700; text-transform: uppercase;">Top 3 Cleanest Cities</span>
+                  <div style="font-size: 0.82rem; color: var(--text-main); margin-top: 4px; line-height: 1.5;">
+                    1. <strong>Naharlagun</strong> (AQI 14 &bull; Good)<br>
+                    2. <strong>Aizawl</strong> (AQI 19 &bull; Good)<br>
+                    3. <strong>Gangtok</strong> (AQI 22 &bull; Good)
+                  </div>
+                </div>
+
+                <div>
+                  <span style="font-size: 0.72rem; color: #ea580c; font-weight: 700; text-transform: uppercase;">Top 3 Highest Index Cities</span>
+                  <div style="font-size: 0.82rem; color: var(--text-main); margin-top: 4px; line-height: 1.5;">
+                    1. <strong>Dausa</strong> (AQI 195 &bull; Moderate)<br>
+                    2. <strong>Bhiwadi</strong> (AQI 188 &bull; Moderate)<br>
+                    3. <strong>Ghaziabad</strong> (AQI 174 &bull; Moderate)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           SECTION 3: GOVT DASHBOARD (GRAP Mitigation Center)
+           ==================================================== -->
+      <section class="dashboard-section" id="section-grap">
+        <div class="grap-stages-strip">
+          <div class="grap-stage-box stage-1">
+            <span class="stage-tag">Stage I &bull; Poor (201-300)</span>
+            <strong>Dust Suppression &amp; Sweep</strong>
+            <p>Mechanical sweeping, periodic water sprinkling, ban on open biomass combustion.</p>
+          </div>
+          <div class="grap-stage-box stage-2 active-stage">
+            <span class="stage-tag">Stage II &bull; Very Poor (301-400) &bull; CURRENT</span>
+            <strong>Hotspot Intervention</strong>
+            <p>Daily sprinkling on hot corridors, uninterrupted power to ban DG sets, enhanced parking fees.</p>
+          </div>
+          <div class="grap-stage-box stage-3">
+            <span class="stage-tag">Stage III &bull; Severe (401-450)</span>
+            <strong>Construction Halt</strong>
+            <p>Strict closure of non-essential construction, ban on stone crushers, BS-III/IV vehicle bans.</p>
+          </div>
+          <div class="grap-stage-box stage-4">
+            <span class="stage-tag">Stage IV &bull; Severe+ (&gt;450)</span>
+            <strong>Emergency Protocol</strong>
+            <p>Halt non-essential trucks, odd-even traffic recommendation, transition schools to online mode.</p>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="table-toolbar">
+            <div>
+              <h3 class="subsection-title">Active Site Exceedance Alerts &amp; Enforcement Directives</h3>
+              <span class="subsection-count">Automated threshold triggers when localized station or site AQI &gt; 300</span>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="cpcb-table">
+              <thead>
+                <tr>
+                  <th>Incident ID</th>
+                  <th>Monitored Hotspot / Zone</th>
+                  <th>Current AQI</th>
+                  <th>Alert Level</th>
+                  <th>Enforcement Mandated</th>
+                  <th>Status</th>
+                  <th style="width: 220px;">Immediate Action</th>
+                </tr>
+              </thead>
+              <tbody id="grapViolationsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           SECTION 4: ADMIN PANEL (Municipal Operations & Fleet)
+           ==================================================== -->
+      <section class="dashboard-section" id="section-admin">
+        <div class="summary-cards-grid">
+          <div class="stat-card border-delhi">
+            <div class="card-caption">Municipal Water Sprinklers</div>
+            <div class="card-main">
+              <div class="stat-num">38 / 42</div>
+              <div class="stat-badge badge-moderate">Active Deployed</div>
+            </div>
+            <div class="stat-details">
+              <span><strong>MCD North &amp; South Fleet:</strong> Continuous Mist Guns</span>
+              <span><strong>Treated Effluent Used:</strong> 1,240 kL Today</span>
+            </div>
+          </div>
+
+          <div class="stat-card border-overview">
+            <div class="card-caption">Anti-Smog Gun Stations</div>
+            <div class="card-main">
+              <div class="stat-num">14 Active</div>
+              <div class="stat-badge badge-all">Static Units</div>
+            </div>
+            <div class="stat-details">
+              <span><strong>Hotspot Towers:</strong> Anand Vihar, Wazirpur, Okhla</span>
+              <span><strong>Operating Cycle:</strong> 45 min spray / 15 min dwell</span>
+            </div>
+          </div>
+
+          <div class="stat-card border-dist">
+            <div class="card-caption">DPCC Enforcement Squads</div>
+            <div class="card-main">
+              <div class="stat-num">12 Squads</div>
+              <div class="stat-badge badge-good">On Field</div>
+            </div>
+            <div class="stat-details">
+              <span><strong>Inspections:</strong> 84 Sites Checked</span>
+              <span><strong>Show-Cause Notices:</strong> 11 Issued</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card" style="padding: 20px;">
+          <h4 style="margin-bottom: 12px; color: var(--text-main); font-size: 0.95rem;">
+            <i class="fa-solid fa-clipboard-list" style="color: #2563eb;"></i>
+            Municipal Enforcement &amp; Resource Dispatch Log
+          </h4>
+          <div class="dispatch-log-list" id="dispatchLogList"></div>
+        </div>
+      </section>
+
+
+
+      <!-- ====================================================
+           SECTION 6: SOURCE ATTRIBUTION
+           ==================================================== -->
+      <section class="dashboard-section" id="section-source">
+        <div class="grid-2">
+          <div class="section-card">
+            <div class="card-head" style="padding: 16px 20px; border-bottom: 1px solid var(--gov-border);">
+              <h4><i class="fa-solid fa-chart-pie"></i> Real-Time Emission Source Contribution Split</h4>
+            </div>
+            <div style="padding: 20px; height: 320px; position: relative;">
+              <canvas id="sourcePieChart"></canvas>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="card-head" style="padding: 16px 20px; border-bottom: 1px solid var(--gov-border);">
+              <h4><i class="fa-solid fa-chart-column"></i> 7-Day Rolling Source Dynamics (Stacked Trends)</h4>
+            </div>
+            <div style="padding: 20px; height: 320px; position: relative;">
+              <canvas id="sourceStackedChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           SECTION 7: STUBBLE FIRE INFLUX
+           ==================================================== -->
+      <section class="dashboard-section" id="section-stubble">
+        <div class="stubble-banner">
+          <div class="stubble-banner-item">
+            <span class="lbl"><i class="fa-solid fa-satellite"></i> Satellite Telemetry</span>
+            <span class="val">NASA VIIRS / MODIS Fire Feed</span>
+            <span class="sub">Active 48-Hour Surveillance</span>
+          </div>
+          <div class="stubble-banner-item border-l">
+            <span class="lbl"><i class="fa-solid fa-fire"></i> Active Stubble Fires</span>
+            <span class="val text-danger" id="stubbleFireTotal">1,842</span>
+            <span class="sub">Punjab: 1,120 &bull; Haryana: 542 &bull; UP Border: 180</span>
+          </div>
+          <div class="stubble-banner-item border-l">
+            <span class="lbl"><i class="fa-solid fa-wind"></i> Wind Vector Influx</span>
+            <span class="val text-warning">NW @ 18.5 km/h</span>
+            <span class="sub">Trans-boundary Influx Fraction: 29.4%</span>
+          </div>
+          <div class="stubble-banner-item border-l">
+            <span class="lbl"><i class="fa-solid fa-layer-group"></i> Boundary Layer Height</span>
+            <span class="val">480 meters</span>
+            <span class="sub">Inversion trapping pollutants in NCR Basin</span>
+          </div>
+        </div>
+
+        <div class="section-card" style="padding: 20px;">
+          <h4 style="margin-bottom: 12px; color: var(--text-main); font-size: 1rem;">
+            <i class="fa-solid fa-route" style="color: #ea580c;"></i>
+            Trans-Boundary Stubble Smoke Migration Model (Punjab/Haryana &rarr; Delhi NCR)
+          </h4>
+          <div class="trajectory-grid">
+            <div class="trajectory-card">
+              <span class="step-num">Step 1</span>
+              <strong>Agricultural Crop Residue Fires</strong>
+              <p>Post-paddy harvest burning in Amritsar, Firozpur, Sangrur, and Kaithal generates high particulate plumes rich in carbonaceous aerosols.</p>
+            </div>
+            <div class="trajectory-card">
+              <span class="step-num">Step 2</span>
+              <strong>North-Westerly Wind Advection</strong>
+              <p>Seasonal upper-air winds travel at 15–25 km/h from the north-west, carrying uninhibited particulate streams across the Indo-Gangetic Plain.</p>
+            </div>
+            <div class="trajectory-card">
+              <span class="step-num">Step 3</span>
+              <strong>Thermal Inversion &amp; Basin Trapping</strong>
+              <p>Declining night temperatures lower the atmospheric boundary layer to ~480m, preventing vertical dispersal and trapping smoke in Delhi's urban bowl.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================
+           SECTION 8: CPCB BULLETIN DATASET TABLE (257 Cities)
+           ==================================================== -->
+      <section class="dashboard-section" id="section-table">
+        <div class="grid-split">
+          <div class="section-card table-section">
+            <div class="table-toolbar">
+              <div>
+                <h3 class="subsection-title">City Air Quality Index Table</h3>
+                <span class="subsection-count" id="tableFilterCount">Showing 257 of 257 cities</span>
+              </div>
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="citySearchInput" placeholder="Search city (e.g. Delhi, Agra, Mumbai, Jaipur)..." />
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="cpcb-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">S.No</th>
+                    <th>City</th>
+                    <th>Air Quality</th>
+                    <th>Index Value</th>
+                    <th>Prominent Pollutant</th>
+                    <th>Stations (Part./Total)</th>
+                    <th style="width: 85px;">Map</th>
+                  </tr>
+                </thead>
+                <tbody id="cpcbTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <aside class="side-panel">
+            <div class="section-card side-card">
+              <div class="card-head">
+                <h4><i class="fa-solid fa-notes-medical"></i> Health Statements for AQI Categories</h4>
+              </div>
+              <div class="health-statements-list">
+                <div class="health-row">
+                  <span class="cat-chip" style="background:#00b050; color:#fff;">Good (0-50)</span>
+                  <p>Minimal Impact.</p>
+                </div>
+                <div class="health-row">
+                  <span class="cat-chip" style="background:#92d050; color:#0f172a;">Satisfactory (51-100)</span>
+                  <p>Minor breathing discomfort to sensitive people.</p>
+                </div>
+                <div class="health-row">
+                  <span class="cat-chip" style="background:#ffff00; color:#0f172a;">Moderate (101-200)</span>
+                  <p>Breathing discomfort to the people with lungs, asthma and heart diseases.</p>
+                </div>
+                <div class="health-row">
+                  <span class="cat-chip" style="background:#ff9900; color:#fff;">Poor (201-300)</span>
+                  <p>Breathing discomfort to most people on prolonged exposure.</p>
+                </div>
+                <div class="health-row">
+                  <span class="cat-chip" style="background:#ff0000; color:#fff;">Very Poor (301-400)</span>
+                  <p>Respiratory illness on prolonged exposure.</p>
+                </div>
+                <div class="health-row">
+                  <span class="cat-chip" style="background:#c00000; color:#fff;">Severe (401-500)</span>
+                  <p>Affects healthy people and seriously impacts those with existing diseases.</p>
+                </div>
+              </div>
+              <div class="cpcb-notes-box">
+                <strong>Official Bulletin Rule:</strong>
+                <p>In case of a city with multiple monitoring locations, average value is used to indicate air quality.</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Institutional Footer -->
+      <footer class="gov-footer">
+        <div class="footer-inner">
+          <p>Data Source: <strong>Central Pollution Control Board (CPCB)</strong>, Ministry of Environment, Forest and Climate Change, Govt. of India.</p>
+          <p class="footer-sub">Average of past 24 hours &bull; Official Bulletin recorded on Oct 10, 2026 @ 4:00 PM</p>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
