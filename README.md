@@ -29,9 +29,9 @@ Estimated hardware cost from the project presentation: **₹4,500 (indoor)** and
 | Government dashboard | Folder present, not documented | `webapp/` |
 | LoRa link between nodes and a gateway | Not in repo | Planned in project design |
 | Wi-Fi / MQTT / HTTP upload from nodes | Not in repo | Neither sketch sends data over a network |
-| AWS ingestion, storage, APIs | Not in repo | No cloud code or config found |
+| AWS ingestion, storage,  | Not in repo | No cloud code or config found |
 
-Mapping `esp_dis.ino` to the indoor module and `Uno_outdor.ino` to the outdoor module is inferred from file names and the project context. The outdoor sketch targets an Arduino Uno with an OLED and has no LoRa code, which differs from the ESP32 + LoRa outdoor design in the project plan.
+
 
 ## Modules
 
@@ -79,22 +79,6 @@ The outdoor sketch labels its calculation "indicative". Treat both as approximat
 
 What exists today is two standalone nodes. The dashed path is planned, not implemented in this repo.
 
-```mermaid
-flowchart LR
-    subgraph Indoor["Indoor node (ESP32)"]
-        S1[PMS7003] --> E[ESP32]
-        E --> M[MAX7219 matrix]
-        E --> SM1[Serial Monitor]
-    end
-    subgraph Outdoor["Outdoor node (Arduino Uno)"]
-        S2[PMS7003] --> U[Arduino Uno]
-        U --> O[SSD1306 OLED]
-        U --> SM2[Serial Monitor]
-    end
-    E -.->|planned| G[Gateway / cloud]
-    U -.->|planned, LoRa| G
-    G -.-> D[Government dashboard]
-```
 
 ## Technology stack
 
@@ -105,7 +89,7 @@ flowchart LR
 | Sensor | Plantower PMS7003 |
 | Displays | MAX7219 4-in-1 matrix, SSD1306 128x64 OLED |
 | Libraries | `PMS`, `MD_Parola`, `MD_MAX72xx`, `U8g2`, `SPI`, `SoftwareSerial` |
-| Dashboard | See `webapp/` (not reviewed) |
+| Dashboard | See `webapp/` () |
 
 ## Repository structure
 
@@ -165,7 +149,7 @@ No AWS code, infrastructure definitions or deployment configuration were found i
 
 ## Team and acknowledgements
 
-Team TUFAN, University of Engineering and Management, Kolkata.
+Team TUFAN, .
 Repository maintainer: [@deb8367](https://github.com/deb8367).
 Add team member names and faculty mentors here.
 
