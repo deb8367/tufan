@@ -5,7 +5,7 @@ Urban environmental monitoring project by **Team TUFAN**,
 
 This repository currently holds the **embedded firmware** for two particulate-matter (PM) monitoring nodes and a `webapp/` folder for the dashboard. Each node reads a PMS7003 sensor, computes an Indian CPCB-style AQI from PM2.5 and PM10, and shows it on a local display.
 
-> **Status note:** Only the firmware is documented in detail below. Wireless transmission, cloud ingestion and the dashboard's behaviour are not described here because they are not confirmed in the firmware (see [Implementation status](#implementation-status)).
+> 
 
 ---
 
@@ -17,27 +17,12 @@ Urban air quality varies street by street, but monitoring stations are sparse an
 - Compute a standard AQI on-device so readings are meaningful without a server.
 - Feed collected data into a central dashboard for government-level viewing and analysis.
 
-Estimated hardware cost from the project presentation: **₹4,500 (indoor)** and **₹1,550 (outdoor)**. These are estimates, not measured bills of materials.
-
-## Implementation status
-
-| Component | Status | Evidence in repo |
-|---|---|---|
-| Indoor node firmware (ESP32 + PMS7003 + LED matrix) | Working sketch | `esp_dis.ino` |
-| Outdoor node firmware (Arduino Uno + PMS7003 + OLED) | Working sketch | `Uno_outdor.ino` |
-| On-device AQI calculation (PM2.5, PM10) | Implemented | Both sketches |
-| Government dashboard | Folder present, not documented | `webapp/` |
-| LoRa link between nodes and a gateway | Not in repo | Planned in project design |
-| Wi-Fi / MQTT / HTTP upload from nodes | Not in repo | Neither sketch sends data over a network |
-| AWS ingestion, storage,  | Not in repo | No cloud code or config found |
-
-
 
 ## Modules
 
 ### Indoor monitoring node (`esp_dis.ino`)
 
-- **Board:** ESP32 DevKit (v1.1 per the code comment).
+- **Board:** ESP32 DevKit (v1.1).
 - **Sensor:** PMS7003 on UART2, 9600 baud, sensor TX to GPIO16. ESP32 TX is not connected.
 - **Display:** 4-in-1 MAX7219 (FC16) LED matrix via MD_Parola.
 - **Behaviour:** reads PM1.0, PM2.5 and PM10 (atmospheric-environment values), keeps the latest reading, and every 5 seconds prints a report to the Serial Monitor (115200 baud) and shows `AQI:<n>` on the matrix. Matrix brightness is set to the minimum.
