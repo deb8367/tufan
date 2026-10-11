@@ -112,31 +112,16 @@ No API keys, credentials or environment variables are used by either sketch.
 
 ## AWS and deployment
 
-No AWS code, infrastructure definitions or deployment configuration were found in the firmware. Cloud architecture is a roadmap item, not a current feature. For the dashboard, check `webapp/` for its own setup instructions.
+AWS Elastic Beanstock 
+http://tufan-env.eba-4cv7biwt.ap-southeast-2.elasticbeanstalk.com/
 
-## Limitations and roadmap
 
-**Current limitations**
-
-- Nodes display and print readings only; nothing is stored or transmitted.
-- No Wi-Fi, LoRa, MQTT or HTTP code.
-- The outdoor node uses an Arduino Uno, not the ESP32 + LoRa design in the plan.
-- AQI is computed from PM2.5 and PM10 only; no gas, temperature or humidity sensing.
-- No calibration against a reference instrument and no automated tests.
-
-**Roadmap**
-
-- [ ] LoRa transmission from outdoor nodes to a gateway.
-- [ ] Network upload from indoor nodes.
-- [ ] Cloud ingestion, storage and API layer (AWS under consideration).
-- [ ] Dashboard connected to live node data.
-- [ ] Sensor calibration and field validation.
 
 ## Team and acknowledgements
 
 Team TUFAN, .
 Repository maintainer: [@deb8367](https://github.com/deb8367).
-Add team member names and faculty mentors here.
+Team member names (https://github.com/seyan-git) 
 
 ## License
 
