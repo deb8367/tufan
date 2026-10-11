@@ -1,7 +1,7 @@
 
 # TUFAN: Traffic & Urban Forecasting with Agentic Neural-Intelligence
 
-Urban environmental monitoring project by **Team TUFAN**, University of Engineering and Management (UEM), Kolkata.
+Urban environmental monitoring project by **Team TUFAN**, 
 
 This repository currently holds the **embedded firmware** for two particulate-matter (PM) monitoring nodes and a `webapp/` folder for the dashboard. Each node reads a PMS7003 sensor, computes an Indian CPCB-style AQI from PM2.5 and PM10, and shows it on a local display.
 
